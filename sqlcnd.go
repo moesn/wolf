@@ -100,8 +100,11 @@ func (s *SqlCnd) Build(db *gorm.DB, model interface{}) *gorm.DB {
 		}
 	}
 
-	if s.Paging != nil && s.Paging.Limit > 0 && s.Paging.Offset() > 0 { // 设置分页
+	if s.Paging != nil && s.Paging.Limit > 0 { // 条数
 		ret = ret.Limit(s.Paging.Limit)
+	}
+
+	if s.Paging != nil && s.Paging.Offset() > 0 { // 偏移
 		ret = ret.Offset(s.Paging.Offset())
 	}
 
