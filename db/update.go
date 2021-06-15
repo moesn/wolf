@@ -3,8 +3,8 @@ package db
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/mitchellh/mapstructure"
-	"todo/wolf"
-	"todo/wolf/http"
+	"github.com/moesn/wolf"
+	"github.com/moesn/wolf/http"
 )
 
 // 修改多个字段
