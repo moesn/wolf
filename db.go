@@ -35,6 +35,11 @@ func OpenPgDB(dsn string, maxIdleConns, maxOpenConns int, config *gorm.Config) (
 	return
 }
 
+// 打开MySql数据库连接
+func OpenMySqlDB(dsn string, maxIdleConns, maxOpenConns int, config *gorm.Config) (err error) {
+	return
+}
+
 // 获取数据库链接
 func DB() *gorm.DB {
 	return db
