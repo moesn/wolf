@@ -3,7 +3,7 @@ package structs
 import (
 	"errors"
 	"fmt"
-	"github.com/mlogclub/simple/common/arrays"
+	"github.com/moesn/wolf/common/arrays"
 	"log"
 	"reflect"
 )
