@@ -2,13 +2,13 @@ package web
 
 import (
 	"github.com/moesn/wolf/common/structs"
-	"github.com/moesn/wolf/sqls"
 )
 
 type JsonResult struct {
 	ErrorCode int         `json:"code"`
 	Message   string      `json:"msg"`
 	Data      interface{} `json:"data"`
+	Count     int64         `json:"count"`
 }
 
 func Json(code int, message string, data interface{}) *JsonResult {
@@ -33,11 +33,12 @@ func JsonItemList(data []interface{}) *JsonResult {
 	}
 }
 
-func JsonPageData(results interface{}, page *sqls.Paging) *JsonResult {
-	return JsonData(&PageResult{
-		Results: results,
-		Page:    page,
-	})
+func JsonPageData(data interface{}, count int64) *JsonResult {
+	return &JsonResult{
+		ErrorCode: 0,
+		Data:      data,
+		Count:     count,
+	}
 }
 
 func JsonCursorData(results interface{}, cursor string, hasMore bool) *JsonResult {

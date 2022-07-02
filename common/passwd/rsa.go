@@ -6,8 +6,41 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"log"
+	"os"
 	"runtime"
 )
+
+func GenerateRSAKey(bits int) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		panic(err)
+	}
+
+	X509PrivateKey := x509.MarshalPKCS1PrivateKey(privateKey)
+	privateFile, err := os.Create("private.pem")
+	if err != nil {
+		panic(err)
+	}
+
+	defer privateFile.Close()
+	privateBlock := pem.Block{Type: "RSA Private Key", Bytes: X509PrivateKey}
+	pem.Encode(privateFile, &privateBlock)
+
+	publicKey := privateKey.PublicKey
+	X509PublicKey, err := x509.MarshalPKIXPublicKey(&publicKey)
+	if err != nil {
+		panic(err)
+	}
+
+	publicFile, err := os.Create("public.pem")
+	if err != nil {
+		panic(err)
+	}
+
+	defer publicFile.Close()
+	publicBlock := pem.Block{Type: "RSA Public Key", Bytes: X509PublicKey}
+	pem.Encode(publicFile, &publicBlock)
+}
 
 func RsaEncrypt(plainText, key []byte) (cryptText []byte, err error) {
 	block, _ := pem.Decode(key)
