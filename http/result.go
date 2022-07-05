@@ -1,11 +1,13 @@
-package web
+package http
 
-import "github.com/moesn/wolf/sqls"
+import (
+	"github.com/moesn/wolf/sql"
+)
 
 // PageResult 分页返回数据
 type PageResult struct {
-	Page    *sqls.Paging `json:"page"`    // 分页信息
-	Results interface{}  `json:"results"` // 数据
+	Page    *sql.Paging `json:"page"`    // 分页信息
+	Results interface{} `json:"results"` // 数据
 }
 
 // CursorResult Cursor分页返回数据

@@ -1,4 +1,4 @@
-package sqls
+package sql
 
 import (
 	"github.com/sirupsen/logrus"

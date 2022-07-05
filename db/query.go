@@ -1,69 +1,95 @@
 package db
 
 import (
-	"encoding/json"
 	"github.com/kataras/iris/v12"
-	"github.com/moesn/wolf/sqls"
-	"github.com/moesn/wolf/web"
+	"github.com/moesn/wolf/http"
+	"github.com/moesn/wolf/http/params"
+	"github.com/moesn/wolf/sql"
 	"github.com/tidwall/gjson"
 )
 
-// 查询结构体
-type QueryJson struct {
-	limit  int
-	offset int
-	filter interface{}
-	sort   interface{}
-	fuzzy  struct {
-		field   []string
-		keyword string
-	}
-	exact   interface{}
-	exclude interface{}
-	period  interface{}
-}
-
 // 查询信息
-func QueryBy(id string, model interface{}) *web.JsonResult {
-	if err := sqls.DB().First(model, "id = ?", id).Error; err != nil {
-		return web.JsonErrorMsg(err.Error())
+func QueryBy(id string, model interface{}) *http.JsonResult {
+	if err := DB().First(model, "id = ?", id).Error; err != nil {
+		return http.JsonErrorMsg(err.Error())
 	}
-	return web.JsonData(model) // 返回数据
+	return http.JsonData(model) // 返回数据
 }
 
-// 查询列表
-func QueryList(ctx iris.Context, model interface{}) *web.JsonResult {
-	var params interface{}
-	err := ctx.ReadJSON(&params) // 读取Json请求参数
+func QueryList(ctx iris.Context, model interface{}) *http.JsonResult {
+	return QueryListExtendProcess(ctx,model,params.HttpParams{},nil)
+}
 
-	if err != nil { // 读取Json错误，返回请求参数格式错误
-		return web.JsonErrorMsg(err.Error())
+func QueryListExtend(ctx iris.Context, model interface{},extendParams params.HttpParams) *http.JsonResult {
+	return QueryListExtendProcess(ctx,model,extendParams,nil)
+}
+
+func QueryListProcess(ctx iris.Context, model interface{},process func() interface{}) *http.JsonResult {
+	return QueryListExtendProcess(ctx,model,params.HttpParams{},process)
+}
+
+func QueryListExtendProcess(ctx iris.Context, model interface{},extendParams params.HttpParams,process func() interface{}) *http.JsonResult {
+	json, err := params.ReadJson(ctx)
+
+	if err != nil {
+		return http.JsonError(err)
 	}
 
-	jsonb, _ := json.Marshal(params) // Json转Byte数组
-	jsons := string(jsonb)           // Byte数组转字符串
+	var (
+		page = params.GetInt("page", json)
+		limit = params.GetInt("limit", json)
+		field = params.GetResult("fuzzy.field", json)
+		keyword = params.GetString("fuzzy.keyword", json)
 
-	sql := sqls.NewCnd() // Sql查询条件
+		exact = extendParams.Exact
+		sort = extendParams.Sort
+		fuzzy = extendParams.Fuzzy
+	)
 
-	page := gjson.Get(jsons, "page").Int()   // 第几页
-	limit := gjson.Get(jsons, "limit").Int() // 每页条数
 
-	if page != 0 && limit != 0 { // 分页参数不为空
+	sql := sql.NewCnd()
+
+
+	if page != 0 && limit != 0 {
 		sql.Page(int(page), int(limit))
 	}
 
-	field := gjson.Get(jsons, "fuzzy.field").Array()      // 模糊查询字段
-	keyword := gjson.Get(jsons, "fuzzy.keyword").String() // 模糊查询关键字
-
-	if len(field) > 0 && keyword != "" { // 有效的模糊查询参数
-		for _, column := range field {
-			sql.Like(column.String(), keyword)
+	if exact!=nil{
+		for column, val := range exact {
+			sql.Eq(column,val)
 		}
 	}
 
-	sql.Find(sqls.DB(), model) // 查询数据
+	if fuzzy.Field!=nil&&len(fuzzy.Keyword)!=0{
+		for _, column := range fuzzy.Field {
+			sql.Like(column,fuzzy.Keyword)
+		}
+	}
 
-	count := sql.Count(sqls.DB(), model) //查询条数
+	if sort!=nil{
+		for column, val := range sort {
+			if(val=="asc"){
+				sql.Asc(column)
+			}else if(val=="desc"){
+				sql.Desc(column)
+			}
+		}
+	}
 
-	return web.JsonPageData(model, count) // 返回数据
+	if field.IsArray() && keyword != "" {
+		field.ForEach(func(key, value gjson.Result) bool {
+			sql.Like(value.String(), keyword)
+			return true
+		})
+	}
+
+	sql.Find(DB(), model) // 查询数据
+
+	count := sql.Count(DB(), model) //查询条数
+
+	if(process!=nil){
+		return http.JsonPageData(process(), count) // 返回数据
+	}
+
+	return http.JsonPageData(model, count) // 返回数据
 }

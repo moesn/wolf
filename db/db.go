@@ -1,9 +1,8 @@
-package sqls
+package db
 
 import (
 	"database/sql"
-
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -31,7 +30,7 @@ func Open(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int, model
 	}
 
 	if db, err = gorm.Open(mysql.Open(dsn), config); err != nil {
-		log.Errorf("opens database failed: %s", err.Error())
+		logrus.Errorf("opens database failed: %s", err.Error())
 		return
 	}
 
@@ -39,11 +38,11 @@ func Open(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int, model
 		sqlDB.SetMaxIdleConns(maxIdleConns)
 		sqlDB.SetMaxOpenConns(maxOpenConns)
 	} else {
-		log.Error(err)
+		logrus.Error(err)
 	}
 
 	if err = db.AutoMigrate(models...); nil != err {
-		log.Errorf("auto migrate tables failed: %s", err.Error())
+		logrus.Errorf("auto migrate tables failed: %s", err.Error())
 	}
 	return
 }
@@ -57,6 +56,6 @@ func Close() {
 		return
 	}
 	if err := sqlDB.Close(); nil != err {
-		log.Errorf("Disconnect from database failed: %s", err.Error())
+		logrus.Errorf("Disconnect from database failed: %s", err.Error())
 	}
 }

@@ -1,4 +1,4 @@
-package web
+package http
 
 import (
 	"github.com/moesn/wolf/common/structs"
@@ -66,7 +66,7 @@ func JsonError(err *CodeError) *JsonResult {
 
 func JsonErrorMsg(message string) *JsonResult {
 	return &JsonResult{
-		ErrorCode: 0,
+		ErrorCode: 1,
 		Message:   message,
 		Data:      nil,
 	}

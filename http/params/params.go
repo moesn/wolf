@@ -1,9 +1,12 @@
 package params
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/moesn/wolf/sqls"
+	"github.com/moesn/wolf/http"
+	"github.com/moesn/wolf/sql"
+	"github.com/tidwall/gjson"
 	"strconv"
 	"strings"
 	"time"
@@ -14,6 +17,23 @@ import (
 	"github.com/moesn/wolf/common/strs"
 )
 
+type 	Fuzzy  struct {
+	Field   []string
+	Keyword string
+}
+
+type HttpParams struct {
+	Fuzzy
+	Page  int
+	Limit  int
+	Offset int
+	Filter map[string]interface{}
+	Sort   map[string]interface{}
+	Exact   map[string]interface{}
+	Exclude map[string]interface{}
+	Range  map[string]interface{}
+}
+
 var (
 	decoder = schema.NewDecoder() // form, url, schema.
 )
@@ -21,6 +41,33 @@ var (
 func init() {
 	decoder.AddAliasTag("form", "json")
 	decoder.ZeroEmpty(true)
+}
+
+// ReadJson 读取JSON请求参数
+func ReadJson(ctx iris.Context) (string, *http.CodeError) {
+	var params interface{}
+	err := ctx.ReadJSON(&params)
+
+	if err != nil {
+		return "", http.NewError(1, "错误的JSON请求参数")
+	}
+
+	jsonb, _ := json.Marshal(params)
+	jsons := string(jsonb)
+
+	return jsons, nil
+}
+
+func GetString(name string, json string) string {
+	return gjson.Get(json, name).String()
+}
+
+func GetInt(name string, json string) int64 {
+	return gjson.Get(json, name).Int()
+}
+
+func GetResult(name string, json string) gjson.Result  {
+	return gjson.Get(json, name)
 }
 
 // param error
@@ -158,7 +205,7 @@ func FormDate(ctx iris.Context, name string) *time.Time {
 	return nil
 }
 
-func GetPaging(ctx iris.Context) *sqls.Paging {
+func GetPaging(ctx iris.Context) *sql.Paging {
 	page := FormValueIntDefault(ctx, "page", 1)
 	limit := FormValueIntDefault(ctx, "limit", 20)
 	if page <= 0 {
@@ -167,5 +214,5 @@ func GetPaging(ctx iris.Context) *sqls.Paging {
 	if limit <= 0 {
 		limit = 20
 	}
-	return &sqls.Paging{Page: page, Limit: limit}
+	return &sql.Paging{Page: page, Limit: limit}
 }
