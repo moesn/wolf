@@ -13,10 +13,10 @@ func Create(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	err = http.Verify(model) // 校验参数合法性
-	if err != nil {          // 参数有误，返回参数错误信息
-		return http.JsonErrorMsg(err.Error())
-	}
+	//err = http.Verify(model) // 校验参数合法性
+	//if err != nil {          // 参数有误，返回参数错误信息
+	//	return http.JsonErrorMsg(err.Error())
+	//}
 
 	err = DB().Create(model).Error // 增加数据
 	if err != nil {                    // 增加错误，返回异常错误信息

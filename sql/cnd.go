@@ -64,8 +64,15 @@ func (s *Cnd) Lte(column string, args ...interface{}) *Cnd {
 	return s
 }
 
-func (s *Cnd) Like(column string, str string) *Cnd {
-	s.Where(column+" LIKE ?", "%"+str+"%")
+func (s *Cnd) Like(columns []string, str string) *Cnd {
+	likeCnd := ""
+	for i, column := range columns {
+		likeCnd += column + " LIKE " + "'%" + str + "%'"
+		if i < len(columns)-1 {
+			likeCnd += " OR "
+		}
+	}
+	s.Where(likeCnd)
 	return s
 }
 

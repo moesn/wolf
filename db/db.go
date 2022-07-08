@@ -17,14 +17,14 @@ var (
 	sqlDB *sql.DB
 )
 
-func Open(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int, models ...interface{}) (err error) {
+func Open(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int,tablePrefix string, models ...interface{}) (err error) {
 	if config == nil {
 		config = &gorm.Config{}
 	}
 
 	if config.NamingStrategy == nil {
 		config.NamingStrategy = schema.NamingStrategy{
-			TablePrefix:   "t_",
+			TablePrefix:   tablePrefix,
 			SingularTable: true,
 		}
 	}

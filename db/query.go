@@ -5,7 +5,7 @@ import (
 	"github.com/moesn/wolf/http"
 	"github.com/moesn/wolf/http/params"
 	"github.com/moesn/wolf/sql"
-	"github.com/tidwall/gjson"
+	"github.com/samber/lo"
 )
 
 // 查询信息
@@ -36,60 +36,54 @@ func QueryListExtendProcess(ctx iris.Context, model interface{},extendParams par
 	}
 
 	var (
-		page = params.GetInt("page", json)
-		limit = params.GetInt("limit", json)
-		field = params.GetResult("fuzzy.field", json)
-		keyword = params.GetString("fuzzy.keyword", json)
-
-		exact = extendParams.Exact
-		sort = extendParams.Sort
-		fuzzy = extendParams.Fuzzy
+		page    = params.GetInt("page", json)
+		limit   = params.GetInt("limit", json)
+		field   = params.GetArray("fuzzy.field", json, extendParams.Fuzzy.Field)
+		keyword = params.GetString("fuzzy.keyword", json, extendParams.Fuzzy.Keyword)
+		exact   = lo.Assign(params.GetMap("exact", json), extendParams.Exact)
+		filter    = lo.Assign(params.GetMap("filter", json), extendParams.Filter)
+		sort    = lo.Assign(params.GetMap("sort", json), extendParams.Sort)
 	)
 
-
 	sql := sql.NewCnd()
-
 
 	if page != 0 && limit != 0 {
 		sql.Page(int(page), int(limit))
 	}
 
-	if exact!=nil{
+	if field != nil && keyword != "" {
+			sql.Like(field, keyword)
+	}
+
+	if exact != nil {
 		for column, val := range exact {
-			sql.Eq(column,val)
+			sql.Eq(column, val)
 		}
 	}
 
-	if fuzzy.Field!=nil&&len(fuzzy.Keyword)!=0{
-		for _, column := range fuzzy.Field {
-			sql.Like(column,fuzzy.Keyword)
+	if filter != nil {
+		for column, val := range filter {
+			sql.In(column,val)
 		}
 	}
 
-	if sort!=nil{
+	if sort != nil {
 		for column, val := range sort {
-			if(val=="asc"){
+			if val.(string) == "asc" {
 				sql.Asc(column)
-			}else if(val=="desc"){
+			} else if val.(string) == "desc" {
 				sql.Desc(column)
 			}
 		}
 	}
 
-	if field.IsArray() && keyword != "" {
-		field.ForEach(func(key, value gjson.Result) bool {
-			sql.Like(value.String(), keyword)
-			return true
-		})
+	sql.Find(DB(), model)
+
+	count := sql.Count(DB(), model)
+
+	if process != nil {
+		return http.JsonPageData(process(), count)
 	}
 
-	sql.Find(DB(), model) // 查询数据
-
-	count := sql.Count(DB(), model) //查询条数
-
-	if(process!=nil){
-		return http.JsonPageData(process(), count) // 返回数据
-	}
-
-	return http.JsonPageData(model, count) // 返回数据
+	return http.JsonPageData(model, count)
 }

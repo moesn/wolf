@@ -17,10 +17,10 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 
 	mapstructure.Decode(columns, &model) // 将Map的值映射进Struct
 
-	err = http.Verify(model) // 校验参数合法性
-	if err != nil {          // 参数有误，返回参数错误信息
-		return http.JsonErrorMsg(err.Error())
-	}
+	//err = http.Verify(model) // 校验参数合法性
+	//if err != nil {          // 参数有误，返回参数错误信息
+	//	return http.JsonErrorMsg(err.Error())
+	//}
 
 	err = DB().Model(model).Where("id = ?", columns["id"]).Updates(columns).Error // 修改数据
 
@@ -28,7 +28,7 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	return http.JsonData(nil) // 返回成功
+	return http.JsonData(model) // 返回成功
 }
 
 // 修改单个字段

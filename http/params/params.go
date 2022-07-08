@@ -45,6 +45,10 @@ func init() {
 
 // ReadJson 读取JSON请求参数
 func ReadJson(ctx iris.Context) (string, *http.CodeError) {
+	if ctx==nil {
+		return 	"",nil
+	}
+
 	var params interface{}
 	err := ctx.ReadJSON(&params)
 
@@ -58,15 +62,41 @@ func ReadJson(ctx iris.Context) (string, *http.CodeError) {
 	return jsons, nil
 }
 
-func GetString(name string, json string) string {
-	return gjson.Get(json, name).String()
+func GetString(name string, json string, deft ...string) string {
+	str := gjson.Get(json, name).String()
+	if str == "" && len(deft) != 0 {
+		str = deft[0]
+	}
+	return str
 }
 
 func GetInt(name string, json string) int64 {
 	return gjson.Get(json, name).Int()
 }
 
-func GetResult(name string, json string) gjson.Result  {
+func GetMap(name string, json string) map[string]interface{} {
+	resMap := map[string]interface{}{}
+
+	for key, val := range gjson.Get(json, name).Map() {
+		resMap[key] = val.Value()
+	}
+	return resMap
+}
+
+func GetArray(name string, json string, deft ...[]string) []string {
+	resArray := make([]string, 0)
+
+	for _, val := range gjson.Get(json, name).Array() {
+		resArray = append(resArray, val.String())
+	}
+
+	if len(resArray) == 0 && len(deft) != 0 {
+		resArray = deft[0]
+	}
+	return resArray
+}
+
+func GetResult(name string, json string) gjson.Result {
 	return gjson.Get(json, name)
 }
 
