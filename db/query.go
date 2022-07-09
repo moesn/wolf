@@ -47,10 +47,6 @@ func QueryListExtendProcess(ctx iris.Context, model interface{},extendParams par
 
 	sql := sql.NewCnd()
 
-	if page != 0 && limit != 0 {
-		sql.Page(int(page), int(limit))
-	}
-
 	if field != nil && keyword != "" {
 			sql.Like(field, keyword)
 	}
@@ -75,6 +71,10 @@ func QueryListExtendProcess(ctx iris.Context, model interface{},extendParams par
 				sql.Desc(column)
 			}
 		}
+	}
+
+	if page != 0 && limit != 0 {
+		sql.Page(int(page), int(limit))
 	}
 
 	sql.Find(DB(), model)

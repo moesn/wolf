@@ -3,16 +3,28 @@ package db
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/mitchellh/mapstructure"
+	"github.com/moesn/wolf/common/jsons"
 	"github.com/moesn/wolf/http"
+	"reflect"
 )
 
 // 修改多个字段
 func Update(ctx iris.Context, model interface{}) *http.JsonResult {
-	var columns map[string]interface{}
-	err := ctx.ReadJSON(&columns) // 读取Json请求参数
+	var params map[string]interface{}
+	err := ctx.ReadJSON(&params) // 读取Json请求参数
 
 	if err != nil { // 读取Json错误，返回请求参数格式错误
 		return http.JsonErrorMsg(err.Error())
+	}
+
+	columns:= make(map[string]interface{},0)
+
+	for key, val := range params {
+		if reflect.TypeOf(val)== reflect.TypeOf([]interface{}{}){
+			columns[key]=jsons.ToJsonStr(val)
+		}else{
+			columns[key]=val
+		}
 	}
 
 	mapstructure.Decode(columns, &model) // 将Map的值映射进Struct

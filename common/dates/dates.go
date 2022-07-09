@@ -17,6 +17,11 @@ func NowUnix() int64 {
 	return time.Now().Unix()
 }
 
+// NowDateTime 日期时间
+func NowDateTime() string {
+	return Format(time.Now(),FmtDateTime)
+}
+
 // FromUnix 秒时间戳转时间
 func FromUnix(unix int64) time.Time {
 	return time.Unix(unix, 0)
