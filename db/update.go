@@ -40,6 +40,8 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(err.Error())
 	}
 
+	QueryBy(columns["id"].(string),model)
+
 	return http.JsonData(model) // 返回成功
 }
 

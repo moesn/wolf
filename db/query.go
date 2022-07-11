@@ -8,12 +8,11 @@ import (
 	"github.com/samber/lo"
 )
 
-// 查询信息
 func QueryBy(id string, model interface{}) *http.JsonResult {
 	if err := DB().First(model, "id = ?", id).Error; err != nil {
 		return http.JsonErrorMsg(err.Error())
 	}
-	return http.JsonData(model) // 返回数据
+	return http.JsonData(model)
 }
 
 func QueryList(ctx iris.Context, model interface{}) *http.JsonResult {

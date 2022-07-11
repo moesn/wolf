@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/kataras/iris/v12"
+	"github.com/moesn/wolf/common/structs"
 	"github.com/moesn/wolf/http"
 	"strings"
 )
@@ -29,6 +30,8 @@ func Create(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(errMsg)
 	}
 
+	QueryBy(structs.StructToMap(model)["id"].(string),model)
+
 	return http.JsonData(model) // 返回成功
 }
 
@@ -48,6 +51,8 @@ func Insert(model interface{}) *http.JsonResult {
 		}
 		return http.JsonErrorMsg(errMsg)
 	}
+
+	QueryBy(structs.StructToMap(model)["id"].(string),model)
 
 	return http.JsonData(model) // 返回成功
 }
