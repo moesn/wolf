@@ -8,15 +8,15 @@ import (
 	"reflect"
 )
 
-func StructToMap(obj interface{}, excludes ...string) map[string]interface{} {
+func StructToMap(obj interface{},tag string, excludes ...string) map[string]interface{} {
 	var data = make(map[string]interface{})
 	keys := reflect.TypeOf(obj)
 	values := reflect.ValueOf(obj)
-	fillMap(data, keys, values, excludes...)
+	fillMap(data, keys, values,tag, excludes...)
 	return data
 }
 
-func fillMap(data map[string]interface{}, keys reflect.Type, values reflect.Value, excludes ...string) {
+func fillMap(data map[string]interface{}, keys reflect.Type, values reflect.Value,tag string, excludes ...string) {
 	if values.Kind() == reflect.Ptr {
 		values = values.Elem()
 	}
@@ -29,14 +29,18 @@ func fillMap(data map[string]interface{}, keys reflect.Type, values reflect.Valu
 		valueField := values.Field(i)
 
 		if keyField.Anonymous {
-			fillMap(data, keyField.Type, valueField, excludes...)
+			fillMap(data, keyField.Type, valueField,tag, excludes...)
 		} else {
 			if !arrays.ContainsIgnoreCase(keyField.Name, excludes) {
-				jsonTag := keyField.Tag.Get("json")
+				jsonTag := keyField.Tag.Get(tag)
 				if len(jsonTag) > 0 {
 					data[jsonTag] = valueField.Interface()
 				} else {
-					data[keyField.Name] = valueField.Interface()
+					if keyField.Name=="_Table"{
+						data[keyField.Name] = keyField.Tag.Get("name")
+					}else{
+						data[keyField.Name] = valueField.Interface()
+					}
 				}
 			}
 		}

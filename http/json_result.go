@@ -101,7 +101,7 @@ func NewRspBuilder(obj interface{}) *RspBuilder {
 }
 
 func NewRspBuilderExcludes(obj interface{}, excludes ...string) *RspBuilder {
-	return &RspBuilder{Data: structs.StructToMap(obj, excludes...)}
+	return &RspBuilder{Data: structs.StructToMap(obj, "json",excludes...)}
 }
 
 func (builder *RspBuilder) Put(key string, value interface{}) *RspBuilder {

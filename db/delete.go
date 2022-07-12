@@ -20,5 +20,12 @@ func Delete(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(err.Error())
 	}
 
+	logMap:=make(map[string]interface{},0)
+	logMap["ID"]=ids
+
+	if logger!=nil{
+		logger(ctx,logMap,"删除")
+	}
+
 	return http.JsonData(nil) // 返回成功
 }

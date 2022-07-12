@@ -6,6 +6,7 @@ import (
 	"github.com/moesn/wolf/common/jsons"
 	"github.com/moesn/wolf/http"
 	"reflect"
+	"strings"
 )
 
 // 修改多个字段
@@ -29,18 +30,27 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 
 	mapstructure.Decode(columns, &model) // 将Map的值映射进Struct
 
-	//err = http.Verify(model) // 校验参数合法性
-	//if err != nil {          // 参数有误，返回参数错误信息
-	//	return http.JsonErrorMsg(err.Error())
-	//}
-
-	err = DB().Model(model).Where("id = ?", columns["id"]).Updates(columns).Error // 修改数据
-
-	if err != nil { // 修改错误，返回异常错误信息
+	err = http.Verify(model) // 校验参数合法性
+	if err != nil {          // 参数有误，返回参数错误信息
 		return http.JsonErrorMsg(err.Error())
 	}
 
+	errDb := DB().Model(model).Where("id = ?", columns["id"]).Updates(columns).Error // 修改数据
+
+	if errDb != nil {
+		errMsg:=errDb.Error()
+
+		if strings.Contains(errMsg,"Duplicate entry"){
+			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg,".")[1],"'","",1))
+		}
+		return http.JsonErrorMsg(errMsg)
+	}
+
 	QueryBy(columns["id"].(string),model)
+
+	if logger!=nil{
+		logger(ctx,columns,"修改")
+	}
 
 	return http.JsonData(model) // 返回成功
 }
@@ -54,11 +64,24 @@ func UpdateColumn(ctx iris.Context, model interface{}, column string, value inte
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	err = DB().Model(model).Where("id = (?)", ids).
+	errDb := DB().Model(model).Where("id = (?)", ids).
 		UpdateColumn(column, value).Error
 
-	if err != nil { // 删除错误，返回异常错误信息
-		return http.JsonErrorMsg(err.Error())
+	if errDb != nil {
+		errMsg:=errDb.Error()
+
+		if strings.Contains(errMsg,"Duplicate entry"){
+			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg,".")[1],"'","",1))
+		}
+		return http.JsonErrorMsg(errMsg)
+	}
+
+	logMap:=make(map[string]interface{},0)
+	logMap[column]=value
+	logMap["ID"]=ids
+
+	if logger!=nil{
+		logger(ctx,logMap,"修改")
 	}
 
 	return http.JsonData(nil) // 返回成功

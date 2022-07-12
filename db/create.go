@@ -15,10 +15,10 @@ func Create(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	//err = http.Verify(model) // 校验参数合法性
-	//if err != nil {          // 参数有误，返回参数错误信息
-	//	return http.JsonErrorMsg(err.Error())
-	//}
+	err = http.Verify(model) // 校验参数合法性
+	if err != nil {          // 参数有误，返回参数错误信息
+		return http.JsonErrorMsg(err.Error())
+	}
 
 	errDb := DB().Create(model).Error // 增加数据
 	if errDb != nil {                    // 增加错误，返回异常错误信息
@@ -30,17 +30,23 @@ func Create(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	QueryBy(structs.StructToMap(model)["id"].(string),model)
+	modelMap:=structs.StructToMap(model,"trans")
+
+	QueryBy(modelMap["ID"].(string),model)
+
+	if logger!=nil{
+		logger(ctx,modelMap,"新增")
+	}
 
 	return http.JsonData(model) // 返回成功
 }
 
 // 增加
-func Insert(model interface{}) *http.JsonResult {
-	//err = http.Verify(model) // 校验参数合法性
-	//if err != nil {          // 参数有误，返回参数错误信息
-	//	return http.JsonErrorMsg(err.Error())
-	//}
+func Insert(ctx iris.Context, model interface{}) *http.JsonResult {
+	err := http.Verify(model) // 校验参数合法性
+	if err != nil {          // 参数有误，返回参数错误信息
+		return http.JsonErrorMsg(err.Error())
+	}
 
 	errDb := DB().Create(model).Error // 增加数据
 	if errDb != nil {                    // 增加错误，返回异常错误信息
@@ -52,7 +58,13 @@ func Insert(model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	QueryBy(structs.StructToMap(model)["id"].(string),model)
+	modelMap:=structs.StructToMap(model,"trans")
+
+	QueryBy(modelMap["ID"].(string),model)
+
+	if logger!=nil{
+		logger(ctx,modelMap,"新增")
+	}
 
 	return http.JsonData(model) // 返回成功
 }

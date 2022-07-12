@@ -15,9 +15,11 @@ type GormModel struct {
 var (
 	db    *gorm.DB
 	sqlDB *sql.DB
+	logger func(iris.Context,map[string]interface{},string)
 )
 
-func Open(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int,tablePrefix string, models ...interface{}) (err error) {
+func Open(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int,tablePrefix string,
+	recorder func(iris.Context,map[string]interface{},string), models ...interface{}) (err error) {
 	if config == nil {
 		config = &gorm.Config{}
 	}
@@ -44,6 +46,8 @@ func Open(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int,tableP
 	if err = db.AutoMigrate(models...); nil != err {
 		logrus.Errorf("auto migrate tables failed: %s", err.Error())
 	}
+
+	logger=recorder
 	return
 }
 
