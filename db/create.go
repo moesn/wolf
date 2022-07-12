@@ -30,12 +30,12 @@ func Create(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	modelMap:=structs.StructToMap(model,"trans")
+	logMap := structs.StructToMap(model, "trans")
 
-	QueryBy(modelMap["ID"].(string),model)
+	QueryBy(logMap["ID"].(string), model)
 
 	if logger!=nil{
-		logger(ctx,modelMap,"新增")
+		logger(ctx, logMap, "新增")
 	}
 
 	return http.JsonData(model) // 返回成功
@@ -58,12 +58,12 @@ func Insert(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	modelMap:=structs.StructToMap(model,"trans")
+	logMap := structs.StructToMap(model, "trans")
 
-	QueryBy(modelMap["ID"].(string),model)
+	QueryBy(logMap["ID"].(string), model)
 
 	if logger!=nil{
-		logger(ctx,modelMap,"新增")
+		logger(ctx, logMap, "新增")
 	}
 
 	return http.JsonData(model) // 返回成功

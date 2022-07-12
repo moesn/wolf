@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/mitchellh/mapstructure"
 	"github.com/moesn/wolf/common/jsons"
+	"github.com/moesn/wolf/common/structs"
 	"github.com/moesn/wolf/http"
 	"reflect"
 	"strings"
@@ -35,21 +36,33 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(err.Error())
 	}
 
+	rawData := structs.StructToMap(QueryBy(columns["id"].(string), model).Data, "trans")
 	errDb := DB().Model(model).Where("id = ?", columns["id"]).Updates(columns).Error // 修改数据
 
 	if errDb != nil {
-		errMsg:=errDb.Error()
+		errMsg := errDb.Error()
 
-		if strings.Contains(errMsg,"Duplicate entry"){
-			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg,".")[1],"'","",1))
+		if strings.Contains(errMsg, "Duplicate entry") {
+			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg, ".")[1], "'", "", 1))
 		}
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	QueryBy(columns["id"].(string),model)
+	QueryBy(columns["id"].(string), model)
 
-	if logger!=nil{
-		logger(ctx,columns,"修改")
+	logMap := structs.StructToMap(model, "trans")
+	for key, val := range logMap {
+		if reflect.TypeOf(val) == reflect.TypeOf(structs.JSON{}) {
+			if jsons.ToJsonStr(val) == jsons.ToJsonStr(rawData[key]) {
+				delete(logMap, key)
+			}
+		} else if val == rawData[key] && key != "ID" && key != "_Table" {
+			delete(logMap, key)
+		}
+	}
+
+	if logger != nil {
+		logger(ctx, logMap, "修改")
 	}
 
 	return http.JsonData(model) // 返回成功
@@ -68,20 +81,23 @@ func UpdateColumn(ctx iris.Context, model interface{}, column string, value inte
 		UpdateColumn(column, value).Error
 
 	if errDb != nil {
-		errMsg:=errDb.Error()
+		errMsg := errDb.Error()
 
-		if strings.Contains(errMsg,"Duplicate entry"){
-			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg,".")[1],"'","",1))
+		if strings.Contains(errMsg, "Duplicate entry") {
+			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg, ".")[1], "'", "", 1))
 		}
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	logMap:=make(map[string]interface{},0)
-	logMap[column]=value
-	logMap["ID"]=ids
+	modelMap := structs.StructToMap(model, "trans")
+	logMap := make(map[string]interface{}, 0)
 
-	if logger!=nil{
-		logger(ctx,logMap,"修改")
+	logMap["_Table"] = modelMap["_Table"]
+	logMap[column] = value
+	logMap["ID"] = strings.Join(ids, ",")
+
+	if logger != nil {
+		logger(ctx, logMap, "修改")
 	}
 
 	return http.JsonData(nil) // 返回成功

@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"github.com/kataras/iris/v12"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

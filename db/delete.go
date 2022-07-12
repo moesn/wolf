@@ -2,7 +2,9 @@ package db
 
 import (
 	"github.com/kataras/iris/v12"
+	"github.com/moesn/wolf/common/structs"
 	"github.com/moesn/wolf/http"
+	"strings"
 )
 
 // 删除
@@ -20,11 +22,14 @@ func Delete(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	logMap:=make(map[string]interface{},0)
-	logMap["ID"]=ids
+	modelMap := structs.StructToMap(model, "trans")
+	logMap := make(map[string]interface{}, 0)
 
-	if logger!=nil{
-		logger(ctx,logMap,"删除")
+	logMap["_Table"] = modelMap["_Table"]
+	logMap["ID"] = strings.Join(ids, ",")
+
+	if logger != nil {
+		logger(ctx, logMap, "删除")
 	}
 
 	return http.JsonData(nil) // 返回成功
