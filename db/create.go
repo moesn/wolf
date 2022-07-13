@@ -23,42 +23,42 @@ func CreatePrePost(ctx iris.Context, model interface{},preProcess func(),postPro
 }
 
 func Creater(ctx iris.Context, model interface{},preProcess func(),postProcess func()) *http.JsonResult {
-	err := ctx.ReadJSON(&model) // 读取Json请求参数
+	err := ctx.ReadJSON(&model)
 
-	if err != nil { // 读取Json错误，返回请求参数格式错误
+	if err != nil {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	err = http.Verify(model) // 校验参数合法性
-	if err != nil {          // 参数有误，返回参数错误信息
+	err = http.Verify(model)
+	if err != nil {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	if preProcess!=nil{
+	if preProcess != nil {
 		preProcess()
 	}
 
-	errDb := DB().Create(model).Error // 增加数据
-	if errDb != nil {                    // 增加错误，返回异常错误信息
-		errMsg:=errDb.Error()
+	errDb := DB().Create(model).Error
+	if errDb != nil {
+		errMsg := errDb.Error()
 
-		if strings.Contains(errMsg,"Duplicate entry"){
-			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg,".")[1],"'","",1))
+		if strings.Contains(errMsg, "Duplicate entry") {
+			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg, ".")[1], "'", "", 1))
 		}
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	logMap:=GetLogMap(model)
+	logMap := GetLogMap(model)
 
-	QueryBy(logMap["Id"].(string),model)
+	QueryBy(logMap["Id"].(string), model)
 
-	if logger!=nil{
-		logger(ctx,logMap,"新增")
+	if logger != nil {
+		logger(ctx, logMap, "新增")
 	}
 
-	if postProcess!=nil{
+	if postProcess != nil {
 		postProcess()
 	}
 
-	return http.JsonData(model) // 返回成功
+	return http.JsonData(model)
 }

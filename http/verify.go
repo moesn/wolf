@@ -15,7 +15,7 @@ var (
 	validate *validator.Validate
 )
 
-// 初始化参数校验
+
 func VerifyInit() {
 	zh := zh.New()
 	uni := ut.New(zh, zh)
@@ -23,7 +23,6 @@ func VerifyInit() {
 	validate = validator.New()
 	validate = validator.New()
 
-	// 字段中文翻译
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := fld.Tag.Get("trans")
 
@@ -40,11 +39,9 @@ func VerifyInit() {
 		return "<" + name + ">"
 	})
 
-	// 注册翻译器
 	zhtrans.RegisterDefaultTranslations(validate, trans)
 }
 
-// 请求参数校验
 func Verify(data interface{}) error {
 	err := validate.Struct(data)
 

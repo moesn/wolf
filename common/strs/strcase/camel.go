@@ -4,7 +4,6 @@ import (
 	"strings"
 )
 
-// Converts a string to CamelCase
 func toCamelInitCase(s string, initCase bool) string {
 	s = addWordBoundariesToNumbers(s)
 	s = strings.Trim(s, " ")
@@ -33,12 +32,10 @@ func toCamelInitCase(s string, initCase bool) string {
 	return n
 }
 
-// ToCamel Converts a string to CamelCase
 func ToCamel(s string) string {
 	return toCamelInitCase(s, true)
 }
 
-// ToLowerCamel Converts a string to lowerCamelCase
 func ToLowerCamel(s string) string {
 	if s == "" {
 		return s

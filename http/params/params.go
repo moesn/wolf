@@ -35,7 +35,7 @@ type HttpParams struct {
 }
 
 var (
-	decoder = schema.NewDecoder() // form, url, schema.
+	decoder = schema.NewDecoder()
 )
 
 func init() {
@@ -43,7 +43,6 @@ func init() {
 	decoder.ZeroEmpty(true)
 }
 
-// ReadJson 读取JSON请求参数
 func ReadJson(ctx iris.Context) (string, *http.CodeError) {
 	if ctx==nil {
 		return 	"",nil
@@ -100,12 +99,10 @@ func GetResult(name string, json string) gjson.Result {
 	return gjson.Get(json, name)
 }
 
-// param error
 func paramError(name string) error {
 	return errors.New(fmt.Sprintf("unable to find param value '%s'", name))
 }
 
-// ReadForm read object from FormData
 func ReadForm(ctx iris.Context, obj interface{}) error {
 	values := ctx.FormValues()
 	if len(values) == 0 {
@@ -220,7 +217,6 @@ func FormValueBoolDefault(ctx iris.Context, name string, def bool) bool {
 	return value
 }
 
-// 从请求中获取日期
 func FormDate(ctx iris.Context, name string) *time.Time {
 	value := FormValue(ctx, name)
 	if strs.IsBlank(value) {

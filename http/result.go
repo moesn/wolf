@@ -4,15 +4,14 @@ import (
 	"github.com/moesn/wolf/sql"
 )
 
-// PageResult 分页返回数据
+
 type PageResult struct {
-	Page    *sql.Paging `json:"page"`    // 分页信息
-	Results interface{} `json:"results"` // 数据
+	Page    *sql.Paging `json:"page"`
+	Results interface{} `json:"results"`
 }
 
-// CursorResult Cursor分页返回数据
 type CursorResult struct {
-	Results interface{} `json:"results"` // 数据
-	Cursor  string      `json:"cursor"`  // 下一页
-	HasMore bool        `json:"hasMore"` // 是否还有数据
+	Results interface{} `json:"results"`
+	Cursor  string      `json:"cursor"`
+	HasMore bool        `json:"hasMore"`
 }

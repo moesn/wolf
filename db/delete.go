@@ -8,29 +8,29 @@ import (
 	"strings"
 )
 
-// 删除
+
 func Delete(ctx iris.Context, model interface{}) *http.JsonResult {
 	var ids []string
-	err := ctx.ReadJSON(&ids) // 读取Json请求参数
+	err := ctx.ReadJSON(&ids)
 
-	if err != nil || len(ids) == 0 { // 读取Json错误或为空，返回请求参数格式错误
+	if err != nil || len(ids) == 0 {
 		return http.JsonErrorMsg(err.Error())
 	}
 
 	err = DB().Delete(model, "id in (?)", ids).Error
 
-	if err != nil { // 删除错误，返回异常错误信息
+	if err != nil {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	if logger!=nil{
-		logMap:=GetLogColumn(model,"-")
-		logMap["Id"]=strings.Join(ids,",")
+	if logger != nil {
+		logMap := GetLogColumn(model, "-")
+		logMap["Id"] = strings.Join(ids, ",")
 
-		logger(ctx,logMap,"删除")
+		logger(ctx, logMap, "删除")
 	}
 
-	return http.JsonData(nil) // 返回成功
+	return http.JsonData(nil)
 }
 
 func GetLogColumn(obj interface{},column string) map[string]interface{} {

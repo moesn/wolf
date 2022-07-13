@@ -1,10 +1,10 @@
 package sql
 
-// Paging 分页请求数据
+
 type Paging struct {
-	Page  int   `json:"page"`  // 页码
-	Limit int   `json:"limit"` // 每页条数
-	Total int64 `json:"total"` // 总数据条数
+	Page  int   `json:"page"`
+	Limit int   `json:"limit"`
+	Total int64 `json:"total"`
 }
 
 func (p *Paging) Offset() int {

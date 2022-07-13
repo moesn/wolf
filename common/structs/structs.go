@@ -85,10 +85,10 @@ func StructFields(s interface{}) []reflect.StructField {
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		results = append(results, f)
-		// if f.Anonymous {
-		// 	fields := StructFields(f.Type)
-		// 	results = append(results, fields...)
-		// }
+
+		fields := StructFields(f.Type)
+		results = append(results, fields...)
+
 	}
 	return results
 }

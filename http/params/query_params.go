@@ -73,14 +73,6 @@ func (q *QueryParams) LteByReq(column string) *QueryParams {
 	return q
 }
 
-//func (q *QueryParams) LikeByReq(column string) *QueryParams {
-//	value := q.getValueByColumn(column)
-//	if len(value) > 0 {
-//		q.Like(column, value)
-//	}
-//	return q
-//}
-
 func (q *QueryParams) PageByReq() *QueryParams {
 	if q.Ctx == nil {
 		return q

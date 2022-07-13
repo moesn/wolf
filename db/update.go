@@ -10,44 +10,44 @@ import (
 	"strings"
 )
 
-// 修改多个字段
+
 func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 	var params map[string]interface{}
-	err := ctx.ReadJSON(&params) // 读取Json请求参数
+	err := ctx.ReadJSON(&params)
 
-	if err != nil { // 读取Json错误，返回请求参数格式错误
+	if err != nil {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	columns:= make(map[string]interface{},0)
+	columns := make(map[string]interface{}, 0)
 
 	for key, val := range params {
-		if reflect.TypeOf(val)== reflect.TypeOf([]interface{}{}){
-			columns[key]=jsons.ToJsonStr(val)
-		}else{
-			columns[key]=val
+		if reflect.TypeOf(val) == reflect.TypeOf([]interface{}{}) {
+			columns[key] = jsons.ToJsonStr(val)
+		} else {
+			columns[key] = val
 		}
 	}
 
-	mapstructure.Decode(columns, &model) // 将Map的值映射进Struct
+	mapstructure.Decode(columns, &model)
 
-	err = http.Verify(model) // 校验参数合法性
-	if err != nil {          // 参数有误，返回参数错误信息
+	err = http.Verify(model)
+	if err != nil {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	rawData:= make(map[string]interface{},0)
-	if logger!=nil{
-		rawData= 	GetLogMap(QueryBy(columns["id"].(string),model).Data)
+	rawData := make(map[string]interface{}, 0)
+	if logger != nil {
+		rawData = GetLogMap(QueryBy(columns["id"].(string), model).Data)
 	}
 
-	errDb := DB().Model(model).Where("id = ?", columns["id"]).Updates(columns).Error // 修改数据
+	errDb := DB().Model(model).Where("id = ?", columns["id"]).Updates(columns).Error
 
 	if errDb != nil {
-		errMsg:=errDb.Error()
+		errMsg := errDb.Error()
 
-		if strings.Contains(errMsg,"Duplicate entry"){
-			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg,".")[1],"'","",1))
+		if strings.Contains(errMsg, "Duplicate entry") {
+			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg, ".")[1], "'", "", 1))
 		}
 		return http.JsonErrorMsg(errMsg)
 	}
@@ -59,25 +59,25 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 		for key, val := range logMap {
 			if reflect.TypeOf(val)==reflect.TypeOf(structs.JSON{}){
 				if(jsons.ToJsonStr(val)==jsons.ToJsonStr(rawData[key])){
-					delete(logMap,key)
+					delete(logMap, key)
 				}
-			}else if val==rawData[key] &&key!="Id"&&key!="_Table"{
-				delete(logMap,key)
+			} else if val == rawData[key] && key != "Id" && key != "_Table" {
+				delete(logMap, key)
 			}
 		}
 
-		logger(ctx,logMap,"修改")
+		logger(ctx, logMap, "修改")
 	}
 
-	return http.JsonData(model) // 返回成功
+	return http.JsonData(model)
 }
 
-// 修改单个字段
+
 func UpdateColumn(ctx iris.Context, model interface{}, column string, value interface{}) *http.JsonResult {
 	var ids []string
-	err := ctx.ReadJSON(&ids) // 读取Json请求参数
+	err := ctx.ReadJSON(&ids)
 
-	if err != nil || len(ids) == 0 { // 读取Json错误或为空，返回请求参数格式错误
+	if err != nil || len(ids) == 0 {
 		return http.JsonErrorMsg(err.Error())
 	}
 
@@ -85,7 +85,7 @@ func UpdateColumn(ctx iris.Context, model interface{}, column string, value inte
 		UpdateColumn(column, value).Error
 
 	if errDb != nil {
-		errMsg:=errDb.Error()
+		errMsg := errDb.Error()
 
 		if strings.Contains(errMsg,"Duplicate entry"){
 			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg,".")[1],"'","",1))
@@ -93,13 +93,13 @@ func UpdateColumn(ctx iris.Context, model interface{}, column string, value inte
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	if logger!=nil{
-		logMap:=GetLogColumn(model,column)
-		logMap["Id"]=strings.Join(ids,",")
+	if logger != nil {
+		logMap := GetLogColumn(model, column)
+		logMap["Id"] = strings.Join(ids, ",")
 
-		logger(ctx,logMap,"修改")
+		logger(ctx, logMap, "修改")
 	}
 
-	return http.JsonData(nil) // 返回成功
+	return http.JsonData(nil)
 
 }

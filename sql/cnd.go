@@ -6,21 +6,21 @@ import (
 )
 
 type Cnd struct {
-	SelectCols []string     // 要查询的字段，如果为空，表示查询所有字段
-	Params     []ParamPair  // 参数
-	Orders     []OrderByCol // 排序
-	Paging     *Paging      // 分页
+	SelectCols []string
+	Params     []ParamPair
+	Orders     []OrderByCol
+	Paging     *Paging
 }
 
 type ParamPair struct {
-	Query string        // 查询
-	Args  []interface{} // 参数
+	Query string
+	Args  []interface{}
 }
 
-// OrderByCol 排序信息
+
 type OrderByCol struct {
-	Column string // 排序字段
-	Asc    bool   // 是否正序
+	Column string
+	Asc    bool
 }
 
 func NewCnd() *Cnd {
@@ -133,14 +133,12 @@ func (s *Cnd) Build(db *gorm.DB) *gorm.DB {
 		ret = ret.Select(s.SelectCols)
 	}
 
-	// where
 	if len(s.Params) > 0 {
 		for _, param := range s.Params {
 			ret = ret.Where(param.Query, param.Args...)
 		}
 	}
 
-	// order
 	if len(s.Orders) > 0 {
 		for _, order := range s.Orders {
 			if order.Asc {
@@ -151,12 +149,10 @@ func (s *Cnd) Build(db *gorm.DB) *gorm.DB {
 		}
 	}
 
-	// limit
 	if s.Paging != nil && s.Paging.Limit > 0 {
 		ret = ret.Limit(s.Paging.Limit)
 	}
 
-	// offset
 	if s.Paging != nil && s.Paging.Offset() > 0 {
 		ret = ret.Offset(s.Paging.Offset())
 	}
@@ -179,7 +175,6 @@ func (s *Cnd) FindOne(db *gorm.DB, out interface{}) error {
 func (s *Cnd) Count(db *gorm.DB, model interface{}) int64 {
 	ret := db.Model(model)
 
-	// where
 	if len(s.Params) > 0 {
 		for _, query := range s.Params {
 			ret = ret.Where(query.Query, query.Args...)
