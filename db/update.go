@@ -36,33 +36,37 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	rawData := structs.StructToMap(QueryBy(columns["id"].(string), model).Data, "trans")
+	rawData:= make(map[string]interface{},0)
+	if logger!=nil{
+		rawData= 	GetLogMap(QueryBy(columns["id"].(string),model).Data)
+	}
+
 	errDb := DB().Model(model).Where("id = ?", columns["id"]).Updates(columns).Error // 修改数据
 
 	if errDb != nil {
-		errMsg := errDb.Error()
+		errMsg:=errDb.Error()
 
-		if strings.Contains(errMsg, "Duplicate entry") {
-			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg, ".")[1], "'", "", 1))
+		if strings.Contains(errMsg,"Duplicate entry"){
+			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg,".")[1],"'","",1))
 		}
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	QueryBy(columns["id"].(string), model)
+	QueryBy(columns["id"].(string),model)
 
-	logMap := structs.StructToMap(model, "trans")
-	for key, val := range logMap {
-		if reflect.TypeOf(val) == reflect.TypeOf(structs.JSON{}) {
-			if jsons.ToJsonStr(val) == jsons.ToJsonStr(rawData[key]) {
-				delete(logMap, key)
+	if logger!=nil{
+		logMap:=GetLogMap(model)
+		for key, val := range logMap {
+			if reflect.TypeOf(val)==reflect.TypeOf(structs.JSON{}){
+				if(jsons.ToJsonStr(val)==jsons.ToJsonStr(rawData[key])){
+					delete(logMap,key)
+				}
+			}else if val==rawData[key] &&key!="Id"&&key!="_Table"{
+				delete(logMap,key)
 			}
-		} else if val == rawData[key] && key != "ID" && key != "_Table" {
-			delete(logMap, key)
 		}
-	}
 
-	if logger != nil {
-		logger(ctx, logMap, "修改")
+		logger(ctx,logMap,"修改")
 	}
 
 	return http.JsonData(model) // 返回成功
@@ -81,23 +85,19 @@ func UpdateColumn(ctx iris.Context, model interface{}, column string, value inte
 		UpdateColumn(column, value).Error
 
 	if errDb != nil {
-		errMsg := errDb.Error()
+		errMsg:=errDb.Error()
 
-		if strings.Contains(errMsg, "Duplicate entry") {
-			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg, ".")[1], "'", "", 1))
+		if strings.Contains(errMsg,"Duplicate entry"){
+			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg,".")[1],"'","",1))
 		}
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	modelMap := structs.StructToMap(model, "trans")
-	logMap := make(map[string]interface{}, 0)
+	if logger!=nil{
+		logMap:=GetLogColumn(model,column)
+		logMap["Id"]=strings.Join(ids,",")
 
-	logMap["_Table"] = modelMap["_Table"]
-	logMap[column] = value
-	logMap["ID"] = strings.Join(ids, ",")
-
-	if logger != nil {
-		logger(ctx, logMap, "修改")
+		logger(ctx,logMap,"修改")
 	}
 
 	return http.JsonData(nil) // 返回成功

@@ -26,9 +26,17 @@ func VerifyInit() {
 	// 字段中文翻译
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := fld.Tag.Get("trans")
+
+		if len(name)==0 {
+			name = fld.Tag.Get("trans_")
+		}
+		if len(name)==0 {
+			name = fld.Tag.Get("trans__")
+		}
 		if name == "-" {
 			return ""
 		}
+
 		return "<" + name + ">"
 	})
 

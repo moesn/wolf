@@ -1,23 +1,14 @@
 package strs
 
 import (
+	uuid "github.com/iris-contrib/go.uuid"
+	"github.com/moesn/wolf/common/jsons"
+	"github.com/moesn/wolf/common/structs"
+	"strconv"
 	"strings"
 	"unicode"
-
-	uuid "github.com/iris-contrib/go.uuid"
 )
 
-/*
-IsBlank checks if a string is whitespace or empty (""). Observe the following behavior:
-    goutils.IsBlank("")        = true
-    goutils.IsBlank(" ")       = true
-    goutils.IsBlank("bob")     = false
-    goutils.IsBlank("  bob  ") = false
-Parameter:
-    str - the string to check
-Returns:
-    true - if the string is whitespace or empty ("")
-*/
 func IsBlank(str string) bool {
 	strLen := len(str)
 	if str == "" || strLen == 0 {
@@ -52,7 +43,6 @@ func DefaultIfBlank(str, def string) string {
 	}
 }
 
-// IsEmpty checks if a string is empty (""). Returns true if empty, and false otherwise.
 func IsEmpty(str string) bool {
 	return len(str) == 0
 }
@@ -91,8 +81,27 @@ func UUID() string {
 	return strings.ReplaceAll(u.String(), "-", "")
 }
 
-// RuneLen 字符成长度
 func RuneLen(s string) int {
 	bt := []rune(s)
 	return len(bt)
+}
+
+func ToString(i interface{}) string {
+	str:=""
+	switch i.(type) {
+	case string:
+		str= i.(string)
+	case bool:
+		str= strconv.FormatBool(i.(bool))
+	case int:
+		str= strconv.Itoa(i.(int))
+	case int64:
+		str= strconv.FormatInt(i.(int64),10)
+	case float64:
+		str= strconv.FormatFloat(i.(float64),'f', 10, 64)
+	case structs.JSON:
+		str= jsons.ToJsonStr(i)
+	}
+
+	return str
 }

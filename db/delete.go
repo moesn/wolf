@@ -2,8 +2,9 @@ package db
 
 import (
 	"github.com/kataras/iris/v12"
-	"github.com/moesn/wolf/common/structs"
+	"github.com/moesn/wolf/common/strs"
 	"github.com/moesn/wolf/http"
+	"reflect"
 	"strings"
 )
 
@@ -22,15 +23,59 @@ func Delete(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	modelMap := structs.StructToMap(model, "trans")
-	logMap := make(map[string]interface{}, 0)
+	if logger!=nil{
+		logMap:=GetLogColumn(model,"-")
+		logMap["Id"]=strings.Join(ids,",")
 
-	logMap["_Table"] = modelMap["_Table"]
-	logMap["ID"] = strings.Join(ids, ",")
-
-	if logger != nil {
-		logger(ctx, logMap, "删除")
+		logger(ctx,logMap,"删除")
 	}
 
 	return http.JsonData(nil) // 返回成功
 }
+
+func GetLogColumn(obj interface{},column string) map[string]interface{} {
+	return GetLog(obj,column)
+}
+
+func GetLogMap(obj interface{}) map[string]interface{} {
+	return GetLog(obj,"")
+}
+
+func GetLog(obj interface{},column string) map[string]interface{} {
+	var data = make(map[string]interface{})
+
+	keys := reflect.TypeOf(obj)
+	values := reflect.ValueOf(obj)
+
+	if values.Kind() == reflect.Ptr {
+		values = values.Elem()
+	}
+	if keys.Kind() == reflect.Ptr {
+		keys = keys.Elem()
+	}
+
+	for i := 0; i < keys.NumField(); i++ {
+		keyField := keys.Field(i)
+		valueField := values.Field(i)
+		jsonTag:=keyField.Tag.Get("json")
+
+		if keyField.Name=="_Table"{
+			data["_Table"] = keyField.Tag.Get("trans")
+		}else if keyField.Name=="Id"{
+			data["Id"] = valueField.Interface()
+		}else if len(column)==0||jsonTag==column{
+			trans__Tag := keyField.Tag.Get("trans__")
+			if len(trans__Tag)>0{
+				data[trans__Tag] = keyField.Tag.Get(strs.ToString(valueField.Interface()))
+			}else{
+				trans_Tag := keyField.Tag.Get("trans_")
+				if len(trans_Tag)>0{
+					data[trans_Tag] = valueField.Interface()
+				}
+			}
+		}
+	}
+
+	return data
+}
+

@@ -36,11 +36,7 @@ func fillMap(data map[string]interface{}, keys reflect.Type, values reflect.Valu
 				if len(jsonTag) > 0 {
 					data[jsonTag] = valueField.Interface()
 				} else {
-					if keyField.Name=="_Table"{
-						data[keyField.Name] = keyField.Tag.Get("name")
-					}else{
 						data[keyField.Name] = valueField.Interface()
-					}
 				}
 			}
 		}
