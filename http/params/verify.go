@@ -1,4 +1,4 @@
-package http
+package params
 
 import (
 	"errors"
@@ -14,7 +14,6 @@ var (
 	trans    ut.Translator
 	validate *validator.Validate
 )
-
 
 func VerifyInit() {
 	zh := zh.New()

@@ -5,13 +5,15 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
 
-type GormModel struct {
-	Id int64 `gorm:"primaryKey;autoIncrement" json:"id" form:"id"`
-}
+const (
+	MYSQL    = "mysql"
+	POSTGRES = "postgres"
+)
 
 var (
 	db    *gorm.DB
@@ -19,8 +21,8 @@ var (
 	logger func(iris.Context,map[string]interface{},string)
 )
 
-func Open(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int,tablePrefix string,
-	recorder func(iris.Context,map[string]interface{},string), models ...interface{}) (err error) {
+func Open(dbUrl, dbType string, config *gorm.Config, maxIdleConns, maxOpenConns int, tablePrefix string,
+	recorder func(iris.Context, map[string]interface{}, string), models ...interface{}) (err error) {
 	if config == nil {
 		config = &gorm.Config{}
 	}
@@ -32,9 +34,19 @@ func Open(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int,tableP
 		}
 	}
 
-	if db, err = gorm.Open(mysql.Open(dsn), config); err != nil {
-		logrus.Errorf("opens database failed: %s", err.Error())
-		return
+	switch dbType {
+	case MYSQL:
+		if db, err = gorm.Open(mysql.Open(dbUrl), config); err != nil {
+			logrus.Errorf("打开数据库连接失败: %s", err.Error())
+			return
+		}
+		break
+	case POSTGRES:
+		if db, err = gorm.Open(postgres.Open(dbUrl), config); err != nil {
+			logrus.Errorf("打开数据库连接失败: %s", err.Error())
+			return
+		}
+		break
 	}
 
 	if sqlDB, err = db.DB(); err == nil {
@@ -45,7 +57,7 @@ func Open(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int,tableP
 	}
 
 	if err = db.AutoMigrate(models...); nil != err {
-		logrus.Errorf("auto migrate tables failed: %s", err.Error())
+		logrus.Errorf("自动合并表失败: %s", err.Error())
 	}
 
 	logger=recorder
@@ -61,6 +73,6 @@ func Close() {
 		return
 	}
 	if err := sqlDB.Close(); nil != err {
-		logrus.Errorf("Disconnect from database failed: %s", err.Error())
+		logrus.Errorf("关闭数据库连接失败: %s", err.Error())
 	}
 }
