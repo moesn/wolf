@@ -21,7 +21,7 @@ var (
 	logger func(iris.Context,map[string]interface{},string)
 )
 
-func Open(dbUrl, dbType string, config *gorm.Config, maxIdleConns, maxOpenConns int, tablePrefix string,
+func Open(dbUrl, dbType string, tablePrefix string, maxIdleConns, maxOpenConns int, config *gorm.Config,
 	recorder func(iris.Context, map[string]interface{}, string), models ...interface{}) (err error) {
 	if config == nil {
 		config = &gorm.Config{}

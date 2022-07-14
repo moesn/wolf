@@ -1,4 +1,4 @@
-package wolf
+package oss
 
 import (
 	"github.com/moesn/wolf/db"
