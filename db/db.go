@@ -21,7 +21,7 @@ var (
 	logger func(iris.Context,map[string]interface{},string)
 )
 
-func Open(dbUrl, dbType string, tablePrefix string, maxIdleConns, maxOpenConns int, config *gorm.Config,
+func Open(dsn, dbType string, tablePrefix string, maxIdleConns, maxOpenConns int, config *gorm.Config,
 	recorder func(iris.Context, map[string]interface{}, string), models ...interface{}) (err error) {
 	if config == nil {
 		config = &gorm.Config{}
@@ -36,13 +36,13 @@ func Open(dbUrl, dbType string, tablePrefix string, maxIdleConns, maxOpenConns i
 
 	switch dbType {
 	case MYSQL:
-		if db, err = gorm.Open(mysql.Open(dbUrl), config); err != nil {
+		if db, err = gorm.Open(mysql.Open(dsn), config); err != nil {
 			logrus.Errorf("打开数据库连接失败: %s", err.Error())
 			return
 		}
 		break
 	case POSTGRES:
-		if db, err = gorm.Open(postgres.Open(dbUrl), config); err != nil {
+		if db, err = gorm.Open(postgres.Open(dsn), config); err != nil {
 			logrus.Errorf("打开数据库连接失败: %s", err.Error())
 			return
 		}

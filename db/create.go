@@ -3,6 +3,7 @@ package db
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/moesn/wolf/http"
+	"github.com/moesn/wolf/http/params"
 	"strings"
 )
 
@@ -29,7 +30,7 @@ func Creater(ctx iris.Context, model interface{},preProcess func(),postProcess f
 		return http.JsonErrorMsg(err.Error())
 	}
 
-	err = http.Verify(model)
+	err = params.Verify(model)
 	if err != nil {
 		return http.JsonErrorMsg(err.Error())
 	}

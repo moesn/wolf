@@ -5,7 +5,6 @@ import (
 	"github.com/moesn/wolf/http"
 	"github.com/moesn/wolf/http/params"
 	"github.com/moesn/wolf/sql"
-	"github.com/samber/lo"
 )
 
 func QueryBy(id string, model interface{}) *http.JsonResult {
@@ -16,18 +15,18 @@ func QueryBy(id string, model interface{}) *http.JsonResult {
 }
 
 func QueryList(ctx iris.Context, model interface{}) *http.JsonResult {
-	return QueryListExtendProcess(ctx,model,params.HttpParams{},nil)
+	return QueryListPrePost(ctx,model,nil,nil)
 }
 
-func QueryListExtend(ctx iris.Context, model interface{},extendParams params.HttpParams) *http.JsonResult {
-	return QueryListExtendProcess(ctx,model,extendParams,nil)
+func QueryListPre(ctx iris.Context, model interface{},preProcess func(sqlCnd * sql.Cnd, jsonParams string)) *http.JsonResult {
+	return QueryListPrePost(ctx,model,preProcess,nil)
 }
 
-func QueryListProcess(ctx iris.Context, model interface{},process func() interface{}) *http.JsonResult {
-	return QueryListExtendProcess(ctx,model,params.HttpParams{},process)
+func QueryListPost(ctx iris.Context, model interface{},postProcess func() interface{}) *http.JsonResult {
+	return QueryListPrePost(ctx,model,nil,postProcess)
 }
 
-func QueryListExtendProcess(ctx iris.Context, model interface{},extendParams params.HttpParams,process func() interface{}) *http.JsonResult {
+func QueryListPrePost(ctx iris.Context, model interface{},preProcess func(sqlCnd * sql.Cnd, jsonParams string) ,postProcess func() interface{}) *http.JsonResult {
 	json, err := params.ReadJson(ctx)
 
 	if err != nil {
@@ -37,11 +36,11 @@ func QueryListExtendProcess(ctx iris.Context, model interface{},extendParams par
 	var (
 		page    = params.GetInt("page", json)
 		limit   = params.GetInt("limit", json)
-		field   = params.GetArray("fuzzy.field", json, extendParams.Fuzzy.Field)
-		keyword = params.GetString("fuzzy.keyword", json, extendParams.Fuzzy.Keyword)
-		exact   = lo.Assign(params.GetMap("exact", json), extendParams.Exact)
-		filter    = lo.Assign(params.GetMap("filter", json), extendParams.Filter)
-		sort    = lo.Assign(params.GetMap("sort", json), extendParams.Sort)
+		field   = params.GetArray("fuzzy.field", json)
+		keyword = params.GetString("fuzzy.keyword", json)
+		exact   = params.GetMap("exact", json)
+		filter    = params.GetMap("filter", json)
+		sort    = params.GetMap("sort", json)
 	)
 
 	sql := sql.NewCnd()
@@ -76,12 +75,16 @@ func QueryListExtendProcess(ctx iris.Context, model interface{},extendParams par
 		sql.Page(int(page), int(limit))
 	}
 
+	if preProcess != nil {
+		preProcess(sql,json)
+	}
+
 	sql.Find(DB(), model)
 
 	count := sql.Count(DB(), model)
 
-	if process != nil {
-		return http.JsonPageData(process(), count)
+	if postProcess != nil {
+		return http.JsonPageData(postProcess(), count)
 	}
 
 	return http.JsonPageData(model, count)

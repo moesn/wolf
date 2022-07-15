@@ -15,7 +15,7 @@ var (
 	validate *validator.Validate
 )
 
-func VerifyInit() {
+func init() {
 	zh := zh.New()
 	uni := ut.New(zh, zh)
 	trans, _ = uni.GetTranslator("zh")

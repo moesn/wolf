@@ -6,14 +6,15 @@ import (
 	"github.com/moesn/wolf/common/jsons"
 	"github.com/moesn/wolf/common/structs"
 	"github.com/moesn/wolf/http"
+	"github.com/moesn/wolf/http/params"
 	"reflect"
 	"strings"
 )
 
 
 func Update(ctx iris.Context, model interface{}) *http.JsonResult {
-	var params map[string]interface{}
-	err := ctx.ReadJSON(&params)
+	var jsonParams map[string]interface{}
+	err := ctx.ReadJSON(&jsonParams)
 
 	if err != nil {
 		return http.JsonErrorMsg(err.Error())
@@ -21,7 +22,7 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 
 	columns := make(map[string]interface{}, 0)
 
-	for key, val := range params {
+	for key, val := range jsonParams {
 		if reflect.TypeOf(val) == reflect.TypeOf([]interface{}{}) {
 			columns[key] = jsons.ToJsonStr(val)
 		} else {
@@ -31,7 +32,7 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 
 	mapstructure.Decode(columns, &model)
 
-	err = http.Verify(model)
+	err = params.Verify(model)
 	if err != nil {
 		return http.JsonErrorMsg(err.Error())
 	}

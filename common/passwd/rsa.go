@@ -4,13 +4,20 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/pem"
-	"log"
+	"github.com/sirupsen/logrus"
 	"os"
-	"runtime"
 )
 
-func GenerateRSAKey(bits int) {
+type RsaEncryptor struct {
+	PrivateKey []byte
+	PublickKey []byte
+	Base64     bool
+}
+
+func (r *RsaEncryptor) GenerateRSAKey(bits int) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
 		panic(err)
@@ -42,53 +49,51 @@ func GenerateRSAKey(bits int) {
 	pem.Encode(publicFile, &publicBlock)
 }
 
-func RsaEncrypt(plainText, key []byte) (cryptText []byte, err error) {
-	block, _ := pem.Decode(key)
+func (r *RsaEncryptor) RsaEncrypt(plainText string) string {
+	block, _ := pem.Decode(r.PublickKey)
+
 	defer func() {
 		if err := recover(); err != nil {
-			switch err.(type) {
-			case runtime.Error:
-				log.Println("runtime err:", err, "Check that the key is correct")
-			default:
-				log.Println("error:", err)
-			}
+			logrus.Error("RSA加密错误:", err)
 		}
 	}()
-	publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	publicKey := publicKeyInterface.(*rsa.PublicKey)
 
-	cipherText, err := rsa.EncryptPKCS1v15(rand.Reader, publicKey, plainText)
+	publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+	publicKey := publicKeyInterface.(*rsa.PublicKey)
+	cipherText, err := rsa.EncryptPKCS1v15(rand.Reader, publicKey, []byte(plainText))
+
 	if err != nil {
-		return nil, err
+		return ""
 	}
-	return cipherText, nil
+
+	if r.Base64 {
+		return base64.StdEncoding.EncodeToString(cipherText)
+	} else {
+		return hex.EncodeToString(cipherText)
+	}
 }
 
-func RsaDecrypt(cryptText, key []byte) (plainText []byte, err error) {
-	block, _ := pem.Decode(key)
+func (r *RsaEncryptor) RsaDecrypt(cryptText string, errMsg ...string) string {
+	block, _ := pem.Decode(r.PrivateKey)
+	crypted := make([]byte, 0)
 
 	defer func() {
 		if err := recover(); err != nil {
-			switch err.(type) {
-			case runtime.Error:
-				log.Println("runtime err:", err, "Check that the key is correct")
-			default:
-				log.Println("error:", err)
-			}
+			logrus.Error("RSA解密错误:", errMsg, err)
 		}
 	}()
 
-	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return []byte{}, err
+	if r.Base64 {
+		crypted, _ = base64.StdEncoding.DecodeString(cryptText)
+	} else {
+		crypted, _ = hex.DecodeString(cryptText)
 	}
 
-	plainText, err = rsa.DecryptPKCS1v15(rand.Reader, privateKey, cryptText)
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	plainText, err := rsa.DecryptPKCS1v15(rand.Reader, privateKey, crypted)
+
 	if err != nil {
-		return []byte{}, err
+		return ""
 	}
-	return plainText, nil
+	return string(plainText)
 }
