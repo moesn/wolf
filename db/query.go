@@ -79,6 +79,10 @@ func QueryListPrePost(ctx iris.Context, model interface{},preProcess func(sqlCnd
 		preProcess(sql,json)
 	}
 
+	if len(sql.Orders)==0{
+		sql.Desc("id")
+	}
+
 	sql.Find(DB(), model)
 
 	count := sql.Count(DB(), model)
