@@ -29,7 +29,6 @@ func AppendLine(path string, content string) error {
 	defer func() {
 		_ = file.Close()
 	}()
-
 	content = strings.Join([]string{content, "\n"}, "")
 	_, err = file.WriteString(content)
 	return err

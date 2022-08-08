@@ -20,7 +20,7 @@ func ToStr(t interface{}) (string, error) {
 	return string(data), nil
 }
 
-func ToJsonStr(t interface{}) string {
+func ToString(t interface{}) string {
 	str, err := ToStr(t)
 	if err != nil {
 		logrus.Error(err)

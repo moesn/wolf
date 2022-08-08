@@ -100,7 +100,7 @@ func ToString(i interface{}) string {
 	case float64:
 		str= strconv.FormatFloat(i.(float64),'f', 10, 64)
 	case structs.JSON:
-		str= jsons.ToJsonStr(i)
+		str= jsons.ToString(i)
 	}
 
 	return str
