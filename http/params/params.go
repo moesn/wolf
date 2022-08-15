@@ -17,7 +17,7 @@ import (
 	"github.com/moesn/wolf/common/strs"
 )
 
-type 	Fuzzy  struct {
+type Fuzzy  struct {
 	Field   []string
 	Keyword string
 }
