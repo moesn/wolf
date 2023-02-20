@@ -23,11 +23,11 @@ type Fuzzy  struct {
 }
 
 type HttpParams struct {
-	Fuzzy
 	Page  int
 	Limit  int
-	Offset int
+	Total int
 	Filter map[string]interface{}
+	Fuzzy map[string]interface{}
 	Sort   map[string]interface{}
 	Exact   map[string]interface{}
 	Exclude map[string]interface{}

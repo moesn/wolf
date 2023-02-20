@@ -7,8 +7,10 @@ import (
 type JsonResult struct {
 	ErrorCode int         `json:"code"`
 	Message   string      `json:"msg"`
+	Error     string      `json:"error"`
 	Data      interface{} `json:"data"`
-	Count     int64         `json:"count"`
+	Type      string      `json:"type"`
+	Count     int64       `json:"total"`
 }
 
 func Json(code int, message string, data interface{}) *JsonResult {
@@ -61,6 +63,14 @@ func JsonError(err *CodeError) *JsonResult {
 		ErrorCode: err.Code,
 		Message:   err.Message,
 		Data:      err.Data,
+	}
+}
+
+func JsonSuccessMsg(message string) *JsonResult {
+	return &JsonResult{
+		ErrorCode: 0,
+		Message:   message,
+		Data:      nil,
 	}
 }
 

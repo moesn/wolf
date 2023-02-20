@@ -4,7 +4,6 @@ import (
 	"github.com/moesn/wolf/sql"
 )
 
-
 type PageResult struct {
 	Page    *sql.Paging `json:"page"`
 	Results interface{} `json:"results"`
