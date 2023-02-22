@@ -49,7 +49,7 @@ func (r *RsaEncryptor) GenerateRSAKey(bits int) {
 	pem.Encode(publicFile, &publicBlock)
 }
 
-func (r *RsaEncryptor) RsaEncrypt(plainText string) string {
+func (r *RsaEncryptor) Encrypt(plainText string) string {
 	block, _ := pem.Decode(r.PublickKey)
 
 	defer func() {
@@ -73,7 +73,7 @@ func (r *RsaEncryptor) RsaEncrypt(plainText string) string {
 	}
 }
 
-func (r *RsaEncryptor) RsaDecrypt(cryptText string, errMsg ...string) string {
+func (r *RsaEncryptor) Decrypt(cryptText string, errMsg ...string) string {
 	block, _ := pem.Decode(r.PrivateKey)
 	crypted := make([]byte, 0)
 

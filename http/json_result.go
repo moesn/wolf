@@ -4,6 +4,8 @@ import (
 	"github.com/moesn/wolf/common/structs"
 )
 
+const OkCode = 200
+
 type JsonResult struct {
 	ErrorCode int         `json:"code"`
 	Message   string      `json:"msg"`
@@ -11,6 +13,17 @@ type JsonResult struct {
 	Data      interface{} `json:"data"`
 	Type      string      `json:"type"`
 	Count     int64       `json:"total"`
+}
+
+func NewJsonResult() *JsonResult {
+	return &JsonResult{
+		ErrorCode: OkCode,
+		Message: "",
+		Error: "",
+		Data: "",
+		Type: "",
+		Count: 0,
+	}
 }
 
 func Json(code int, message string, data interface{}) *JsonResult {
@@ -23,21 +36,21 @@ func Json(code int, message string, data interface{}) *JsonResult {
 
 func JsonData(data interface{}) *JsonResult {
 	return &JsonResult{
-		ErrorCode: 0,
+		ErrorCode: OkCode,
 		Data:      data,
 	}
 }
 
 func JsonItemList(data []interface{}) *JsonResult {
 	return &JsonResult{
-		ErrorCode: 0,
+		ErrorCode: OkCode,
 		Data:      data,
 	}
 }
 
 func JsonPageData(data interface{}, count int64) *JsonResult {
 	return &JsonResult{
-		ErrorCode: 0,
+		ErrorCode: OkCode,
 		Data:      data,
 		Count:     count,
 	}
@@ -53,7 +66,7 @@ func JsonCursorData(results interface{}, cursor string, hasMore bool) *JsonResul
 
 func JsonSuccess() *JsonResult {
 	return &JsonResult{
-		ErrorCode: 0,
+		ErrorCode: OkCode,
 		Data:      nil,
 	}
 }
@@ -68,7 +81,7 @@ func JsonError(err *CodeError) *JsonResult {
 
 func JsonSuccessMsg(message string) *JsonResult {
 	return &JsonResult{
-		ErrorCode: 0,
+		ErrorCode: OkCode,
 		Message:   message,
 		Data:      nil,
 	}

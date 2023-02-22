@@ -15,7 +15,7 @@ type AesEncryptor struct {
 	Base64 bool
 }
 
-func (a *AesEncryptor) AesEncrypt(plainText string) string {
+func (a *AesEncryptor) Encrypt(plainText string) string {
 	origData := []byte(plainText)
 	origData = PKCS5Padding(origData, a.Block.BlockSize())
 	crypted := make([]byte, len(origData))
@@ -36,7 +36,7 @@ func (a *AesEncryptor) AesEncrypt(plainText string) string {
 	}
 }
 
-func (a *AesEncryptor) AesDecrypt(cryptText string, errMsg ...string) string {
+func (a *AesEncryptor) Decrypt(cryptText string, errMsg ...string) string {
 	crypted := make([]byte, 0)
 
 	if a.Base64 {

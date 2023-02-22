@@ -1,6 +1,6 @@
 module github.com/moesn/wolf
 
-go 1.18
+go 1.20
 
 require (
 	github.com/go-playground/locales v0.14.0
@@ -10,7 +10,6 @@ require (
 	github.com/iris-contrib/schema v0.0.6
 	github.com/kataras/iris/v12 v12.1.8
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/samber/lo v1.25.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/tidwall/gjson v1.14.1
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
@@ -66,7 +65,6 @@ require (
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
-	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
 	golang.org/x/text v0.3.7 // indirect
