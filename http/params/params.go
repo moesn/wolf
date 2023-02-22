@@ -100,7 +100,7 @@ func GetResult(name string, json string) gjson.Result {
 }
 
 func paramError(name string) error {
-	return errors.New(fmt.Sprintf("unable to find param value '%s'", name))
+	return errors.New(fmt.Sprintf("无法找到参数值 '%s'", name))
 }
 
 func ReadForm(ctx iris.Context, obj interface{}) error {
