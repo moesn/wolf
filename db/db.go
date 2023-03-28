@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
@@ -13,6 +14,7 @@ import (
 const (
 	MYSQL    = "mysql"
 	POSTGRES = "postgres"
+	SQLITE = "sqlite"
 )
 
 var (
@@ -43,6 +45,12 @@ func Open(dsn, dbType string, tablePrefix string, maxIdleConns, maxOpenConns int
 		break
 	case POSTGRES:
 		if db, err = gorm.Open(postgres.Open(dsn), config); err != nil {
+			logrus.Errorf("打开数据库连接失败: %s", err.Error())
+			return
+		}
+		break
+	case SQLITE:
+		if db, err = gorm.Open(sqlite.Open(dsn), config); err != nil {
 			logrus.Errorf("打开数据库连接失败: %s", err.Error())
 			return
 		}
