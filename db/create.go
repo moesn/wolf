@@ -8,22 +8,22 @@ import (
 )
 
 func Create(ctx iris.Context, model interface{}) *http.JsonResult {
-	return Creater(ctx,model,nil,nil)
+	return Creater(ctx, model, nil, nil)
 }
 
-func CreatePre(ctx iris.Context, model interface{},preProcess func()) *http.JsonResult {
-	return Creater(ctx,model,preProcess,nil)
+func CreatePre(ctx iris.Context, model interface{}, preProcess func()) *http.JsonResult {
+	return Creater(ctx, model, preProcess, nil)
 }
 
-func CreatePost(ctx iris.Context, model interface{},postProcess func()) *http.JsonResult {
-	return Creater(ctx,model,nil,postProcess)
+func CreatePost(ctx iris.Context, model interface{}, postProcess func()) *http.JsonResult {
+	return Creater(ctx, model, nil, postProcess)
 }
 
-func CreatePrePost(ctx iris.Context, model interface{},preProcess func(),postProcess func()) *http.JsonResult {
-	return Creater(ctx,model,preProcess,postProcess)
+func CreatePrePost(ctx iris.Context, model interface{}, preProcess, postProcess func()) *http.JsonResult {
+	return Creater(ctx, model, preProcess, postProcess)
 }
 
-func Creater(ctx iris.Context, model interface{},preProcess func(),postProcess func()) *http.JsonResult {
+func Creater(ctx iris.Context, model interface{}, preProcess, postProcess func()) *http.JsonResult {
 	err := ctx.ReadJSON(&model)
 
 	if err != nil {
@@ -51,7 +51,7 @@ func Creater(ctx iris.Context, model interface{},preProcess func(),postProcess f
 
 	logMap := GetLogMap(model)
 
-	QueryBy(logMap["Id"].(string), model)
+	QueryById(logMap["Id"].(string), model)
 
 	if logger != nil {
 		logger(ctx, logMap, "新增")

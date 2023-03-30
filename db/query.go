@@ -7,7 +7,7 @@ import (
 	"github.com/moesn/wolf/sql"
 )
 
-func QueryBy(id string, model interface{}) *http.JsonResult {
+func QueryById(id string, model interface{}) *http.JsonResult {
 	if err := DB().First(model, "id = ?", id).Error; err != nil {
 		return http.JsonErrorMsg(err.Error())
 	}

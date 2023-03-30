@@ -11,8 +11,23 @@ import (
 	"strings"
 )
 
-
 func Update(ctx iris.Context, model interface{}) *http.JsonResult {
+	return Updater(ctx, model, nil, nil)
+}
+
+func UpdatePre(ctx iris.Context, model interface{}, preProcess func()) *http.JsonResult {
+	return Updater(ctx, model, preProcess, nil)
+}
+
+func UpdatePost(ctx iris.Context, model interface{}, postProcess func()) *http.JsonResult {
+	return Updater(ctx, model, nil, postProcess)
+}
+
+func UpdatePrePost(ctx iris.Context, model interface{}, preProcess, postProcess func()) *http.JsonResult {
+	return Updater(ctx, model, preProcess, postProcess)
+}
+
+func Updater(ctx iris.Context, model interface{}, preProcess, postProcess func()) *http.JsonResult {
 	var jsonParams map[string]interface{}
 	err := ctx.ReadJSON(&jsonParams)
 
@@ -39,7 +54,11 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 
 	rawData := make(map[string]interface{}, 0)
 	if logger != nil {
-		rawData = GetLogMap(QueryBy(columns["id"].(string), model).Data)
+		rawData = GetLogMap(QueryById(columns["id"].(string), model).Data)
+	}
+
+	if preProcess != nil {
+		preProcess()
 	}
 
 	errDb := DB().Model(model).Where("id = ?", columns["id"]).Updates(columns).Error
@@ -53,13 +72,13 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	QueryBy(columns["id"].(string),model)
+	QueryById(columns["id"].(string), model)
 
-	if logger!=nil{
-		logMap:=GetLogMap(model)
+	if logger != nil {
+		logMap := GetLogMap(model)
 		for key, val := range logMap {
-			if reflect.TypeOf(val)==reflect.TypeOf(structs.JSON{}){
-				if jsons.ToString(val)==jsons.ToString(rawData[key]) {
+			if reflect.TypeOf(val) == reflect.TypeOf(structs.JSON{}) {
+				if jsons.ToString(val) == jsons.ToString(rawData[key]) {
 					delete(logMap, key)
 				}
 			} else if val == rawData[key] && key != "Id" && key != "_Table" {
@@ -70,9 +89,12 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 		logger(ctx, logMap, "修改")
 	}
 
+	if postProcess != nil {
+		postProcess()
+	}
+
 	return http.JsonData(model)
 }
-
 
 func UpdateColumn(ctx iris.Context, model interface{}, column string, value interface{}) *http.JsonResult {
 	var ids []string
@@ -88,8 +110,8 @@ func UpdateColumn(ctx iris.Context, model interface{}, column string, value inte
 	if errDb != nil {
 		errMsg := errDb.Error()
 
-		if strings.Contains(errMsg,"Duplicate entry"){
-			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg,".")[1],"'","",1))
+		if strings.Contains(errMsg, "Duplicate entry") {
+			return http.JsonErrorMsg(strings.Replace(strings.Split(errMsg, ".")[1], "'", "", 1))
 		}
 		return http.JsonErrorMsg(errMsg)
 	}
