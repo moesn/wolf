@@ -7,6 +7,7 @@ import (
 	"github.com/moesn/wolf/http"
 	"github.com/moesn/wolf/sql"
 	"github.com/tidwall/gjson"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -17,21 +18,21 @@ import (
 	"github.com/moesn/wolf/common/strs"
 )
 
-type Fuzzy  struct {
+type Fuzzy struct {
 	Field   []string
 	Keyword string
 }
 
 type HttpParams struct {
-	Page  int
-	Limit  int
-	Total int
-	Filter map[string]interface{}
-	Fuzzy map[string]interface{}
-	Sort   map[string]interface{}
+	Page    int
+	Limit   int
+	Total   int
+	Filter  map[string]interface{}
+	Fuzzy   map[string]interface{}
+	Sort    map[string]interface{}
 	Exact   map[string]interface{}
 	Exclude map[string]interface{}
-	Range  map[string]interface{}
+	Range   map[string]interface{}
 }
 
 var (
@@ -44,8 +45,8 @@ func init() {
 }
 
 func ReadJson(ctx iris.Context) (string, *http.CodeError) {
-	if ctx==nil {
-		return 	"",nil
+	if ctx == nil {
+		return "", nil
 	}
 
 	var params interface{}
@@ -57,6 +58,16 @@ func ReadJson(ctx iris.Context) (string, *http.CodeError) {
 
 	jsonb, _ := json.Marshal(params)
 	jsons := string(jsonb)
+
+	validKeyReg := regexp.MustCompile(`"[0-9a-zA-Z_-]+":`)
+	validKeys := validKeyReg.FindAllStringSubmatch(jsons, -1)
+
+	allKeyReg := regexp.MustCompile(`":`)
+	allKeys := allKeyReg.FindAllStringSubmatch(jsons, -1)
+
+	if len(validKeys) != len(allKeys) {
+		return "", http.NewError(1, "危险的JSON请求参数")
+	}
 
 	return jsons, nil
 }

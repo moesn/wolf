@@ -4,7 +4,7 @@ import (
 	"github.com/moesn/wolf/common/structs"
 )
 
-const OkCode = 200
+const OkCode = 0
 
 type JsonResult struct {
 	ErrorCode int         `json:"code"`

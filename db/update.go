@@ -59,7 +59,7 @@ func Update(ctx iris.Context, model interface{}) *http.JsonResult {
 		logMap:=GetLogMap(model)
 		for key, val := range logMap {
 			if reflect.TypeOf(val)==reflect.TypeOf(structs.JSON{}){
-				if(jsons.ToString(val)==jsons.ToString(rawData[key])){
+				if jsons.ToString(val)==jsons.ToString(rawData[key]) {
 					delete(logMap, key)
 				}
 			} else if val == rawData[key] && key != "Id" && key != "_Table" {

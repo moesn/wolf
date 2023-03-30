@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"github.com/kataras/iris/v12"
+	cnd "github.com/moesn/wolf/sql"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -14,13 +15,13 @@ import (
 const (
 	MYSQL    = "mysql"
 	POSTGRES = "postgres"
-	SQLITE = "sqlite"
+	SQLITE   = "sqlite"
 )
 
 var (
-	db    *gorm.DB
-	sqlDB *sql.DB
-	logger func(iris.Context,map[string]interface{},string)
+	db     *gorm.DB
+	sqlDB  *sql.DB
+	logger func(iris.Context, map[string]interface{}, string)
 )
 
 func Open(dsn, dbType string, tablePrefix string, maxIdleConns, maxOpenConns int, config *gorm.Config,
@@ -54,6 +55,7 @@ func Open(dsn, dbType string, tablePrefix string, maxIdleConns, maxOpenConns int
 			logrus.Errorf("打开数据库连接失败: %s", err.Error())
 			return
 		}
+		cnd.NoConcat = true
 		break
 	}
 
@@ -68,7 +70,7 @@ func Open(dsn, dbType string, tablePrefix string, maxIdleConns, maxOpenConns int
 		logrus.Errorf("自动合并表失败: %s", err.Error())
 	}
 
-	logger=recorder
+	logger = recorder
 	return
 }
 
