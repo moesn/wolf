@@ -87,20 +87,26 @@ func RuneLen(s string) int {
 }
 
 func ToString(i interface{}) string {
-	str:=""
+	str := ""
 	switch i.(type) {
 	case string:
-		str= i.(string)
+		str = i.(string)
+		break
 	case bool:
-		str= strconv.FormatBool(i.(bool))
+		str = strconv.FormatBool(i.(bool))
+		break
 	case int:
-		str= strconv.Itoa(i.(int))
+		str = strconv.Itoa(i.(int))
+		break
 	case int64:
-		str= strconv.FormatInt(i.(int64),10)
+		str = strconv.FormatInt(i.(int64), 10)
+		break
 	case float64:
-		str= strconv.FormatFloat(i.(float64),'f', 10, 64)
+		str = strconv.FormatFloat(i.(float64), 'f', 10, 64)
+		break
 	case structs.JSON:
-		str= jsons.ToString(i)
+		str = jsons.ToString(i)
+		break
 	}
 
 	return str
