@@ -54,7 +54,7 @@ func Updater(ctx iris.Context, model interface{}, preProcess, postProcess func()
 
 	rawData := make(map[string]interface{}, 0)
 	if logger != nil {
-		rawData = GetLogMap(QueryById(columns["id"].(string), model).Data)
+		rawData = GetLogMap(QueryById(columns["id"], model).Data)
 	}
 
 	if preProcess != nil {
@@ -72,7 +72,7 @@ func Updater(ctx iris.Context, model interface{}, preProcess, postProcess func()
 		return http.JsonErrorMsg(errMsg)
 	}
 
-	QueryById(columns["id"].(string), model)
+	QueryById(columns["id"], model)
 
 	if logger != nil {
 		logMap := GetLogMap(model)

@@ -51,7 +51,7 @@ func Creater(ctx iris.Context, model interface{}, preProcess, postProcess func()
 
 	logMap := GetLogMap(model)
 
-	QueryById(logMap["Id"].(string), model)
+	QueryById(logMap["Id"], model)
 
 	if logger != nil {
 		logger(ctx, logMap, "新增")
