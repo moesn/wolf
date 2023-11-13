@@ -10,7 +10,7 @@ import (
 
 
 func Delete(ctx iris.Context, model interface{}) *http.JsonResult {
-	var ids []string
+	var ids []interface{}
 	err := ctx.ReadJSON(&ids)
 
 	if err != nil || len(ids) == 0 {
